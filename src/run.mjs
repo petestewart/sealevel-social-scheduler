@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { POSTS_DIR, pickTemplate, tomorrowIso } from "./lib.mjs";
 import { fetchSchedule, fixtureSchedule } from "./fetch-schedule.mjs";
@@ -37,3 +37,8 @@ console.log(`Image: ${outFile}`);
 const caption = buildCaption({ date, classes });
 await writeFile(path.join(POSTS_DIR, `${date}.txt`), caption);
 console.log(`Caption:\n${caption}`);
+
+// Stable-name copies so the email step (and anything else) can reference
+// the latest post without knowing the date.
+await copyFile(outFile, path.join(POSTS_DIR, "image-latest.jpg"));
+await writeFile(path.join(POSTS_DIR, "caption-latest.txt"), caption);

@@ -95,6 +95,26 @@ jobs:
           node src/post.mjs \
             ${{ inputs.date && format('--date {0}', inputs.date) || '' }}
 
+      # Email fallback/preview: needs GMAIL_ADDRESS + GMAIL_APP_PASSWORD secrets.
+      # Sends the finished image + caption to your inbox at 7pm — post from the
+      # Instagram app in ~30s, with IG's native "Share to Facebook" covering FB.
+      - name: Email the finished post
+        if: steps.guard.outputs.skip != 'true' && inputs.dry_run != true && env.GMAIL_APP_PASSWORD != ''
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        uses: dawidd6/action-send-mail@v6
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.GMAIL_ADDRESS }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          from: Sealevel Schedule Bot <${{ secrets.GMAIL_ADDRESS }}>
+          to: ${{ secrets.GMAIL_ADDRESS }}
+          subject: "Tomorrow's schedule post is ready 🧘"
+          body: file://posts/caption-latest.txt
+          attachments: posts/image-latest.jpg
+
       - name: Upload debug artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4

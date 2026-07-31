@@ -1,3 +1,5 @@
 node_modules/
 posts/tmp/
 *.log
+posts/image-latest.jpg
+posts/caption-latest.txt
