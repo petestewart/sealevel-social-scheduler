@@ -74,7 +74,7 @@ jobs:
         run: |
           git config user.name "sealevel-social-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add posts/*.jpg posts/*.txt
+          git add posts/
           if git diff --cached --quiet; then
             echo "Nothing new to commit (already rendered today?)."
             echo "committed=false" >> "$GITHUB_OUTPUT"
