@@ -13,7 +13,7 @@ const OPENERS = [
 const CLOSERS = [
   "Reserve your spot → link in bio",
   "Spots fill up — book ahead at sealevelhotyoga.com",
-  "Book your spot at sealevelhotyoga.com",
+  "Book your class at sealevelhotyoga.com",
   "Grab a spot → sealevelhotyoga.com",
 ];
 
