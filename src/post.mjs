@@ -41,8 +41,35 @@ console.log(`Image is live: ${imageUrl}`);
 
 const webhook = process.env.MAKE_WEBHOOK_URL;
 const metaToken = process.env.META_ACCESS_TOKEN;
+const igLoginToken = process.env.IG_LOGIN_TOKEN;
 
-if (webhook) {
+if (igLoginToken) {
+  // ---- Instagram-login API mode (no Facebook involved) ----
+  // Business/Creator IG account authorized directly with Instagram credentials.
+  const igUserId = process.env.IG_LOGIN_USER_ID;
+  if (!igUserId) throw new Error("IG_LOGIN_USER_ID is required alongside IG_LOGIN_TOKEN.");
+  const G = "https://graph.instagram.com/v21.0";
+
+  const containerRes = await fetch(`${G}/${igUserId}/media`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ image_url: imageUrl, caption, access_token: igLoginToken }),
+  });
+  const container = await containerRes.json();
+  if (!container.id) throw new Error(`IG container failed: ${JSON.stringify(container)}`);
+
+  // Containers can take a moment to be ready before publishing.
+  await new Promise((r) => setTimeout(r, 8000));
+
+  const publishRes = await fetch(`${G}/${igUserId}/media_publish`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ creation_id: container.id, access_token: igLoginToken }),
+  });
+  const publish = await publishRes.json();
+  if (!publish.id) throw new Error(`IG publish failed: ${JSON.stringify(publish)}`);
+  console.log(`Instagram post published: ${publish.id}`);
+} else if (webhook) {
   // ---- Make.com mode (default) ----
   const res = await fetch(webhook, {
     method: "POST",

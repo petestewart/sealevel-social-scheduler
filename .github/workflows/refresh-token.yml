@@ -1,0 +1,21 @@
+name: Refresh Instagram token
+
+on:
+  schedule:
+    - cron: "0 10 * * 1" # weekly, Monday 10:00 UTC
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save libsodium-wrappers
+      - name: Refresh and store token
+        env:
+          IG_LOGIN_TOKEN: ${{ secrets.IG_LOGIN_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: node src/refresh-token.mjs

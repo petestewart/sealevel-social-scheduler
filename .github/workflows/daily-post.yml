@@ -87,6 +87,8 @@ jobs:
       - name: Post to Instagram + Facebook
         if: steps.guard.outputs.skip != 'true' && inputs.dry_run != true
         env:
+          IG_LOGIN_TOKEN: ${{ secrets.IG_LOGIN_TOKEN }}
+          IG_LOGIN_USER_ID: ${{ secrets.IG_LOGIN_USER_ID }}
           MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
