@@ -124,3 +124,9 @@ jobs:
           name: debug
           path: posts/tmp/
           if-no-files-found: ignore
+
+      - name: Print debug snippet on failure
+        if: failure()
+        run: |
+          echo "=== widget-debug.html (first 4000 bytes) ==="
+          head -c 4000 posts/tmp/widget-debug.html 2>/dev/null || echo "(no debug file)"

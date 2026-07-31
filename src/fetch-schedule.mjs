@@ -28,7 +28,8 @@ const SESSION_SELECTOR =
 export async function fetchSchedule(dateIso) {
   const browser = await chromium.launch({
     executablePath: chromePath(),
-    args: ["--no-sandbox"],
+    // Mindbody's CDN applies bot checks; look like a regular desktop Chrome.
+    args: ["--no-sandbox", "--disable-blink-features=AutomationControlled"],
   });
   try {
     const attempts = [];
@@ -73,7 +74,19 @@ export async function fetchSchedule(dateIso) {
 }
 
 async function scrapePage(browser, dateIso, navigate) {
-  const page = await browser.newPage({ viewport: { width: 1280, height: 2400 } });
+  const page = await browser.newPage({
+    viewport: { width: 1280, height: 2400 },
+    userAgent:
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+  });
+  // Surface what the widget's network calls are doing — visible in CI logs.
+  page.on("response", (res) => {
+    const u = res.url();
+    if (/mindbody|brandedweb|healcode/i.test(u)) {
+      console.log(`  [net] ${res.status()} ${u.slice(0, 140)}`);
+    }
+  });
+  page.on("pageerror", (err) => console.log(`  [pageerror] ${String(err).slice(0, 200)}`));
   try {
     await navigate(page);
 
