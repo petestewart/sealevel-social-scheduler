@@ -59,7 +59,7 @@ export async function renderPost({ date, classes, templateFile, outFile }) {
 
   const tmpDir = path.join(POSTS_DIR, "tmp");
   await mkdir(tmpDir, { recursive: true });
-  const tmpHtml = path.join(tmpDir, `${path.basename(outFile, ".png")}.html`);
+  const tmpHtml = path.join(tmpDir, `${path.basename(outFile, ".jpg")}.html`);
   await writeFile(tmpHtml, html);
 
   const browser = await chromium.launch({
@@ -70,7 +70,7 @@ export async function renderPost({ date, classes, templateFile, outFile }) {
     const page = await browser.newPage({ viewport: { width: 1080, height: 1350 } });
     await page.goto(`file://${tmpHtml}`);
     await page.waitForLoadState("networkidle");
-    await page.screenshot({ path: outFile });
+    await page.screenshot({ path: outFile, type: "jpeg", quality: 92 });
   } finally {
     await browser.close();
     await rm(tmpHtml, { force: true });

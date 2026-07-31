@@ -30,7 +30,7 @@ const templateFile = opt("template") ?? (await pickTemplate(date));
 console.log(`Template: ${templateFile}`);
 
 await mkdir(POSTS_DIR, { recursive: true });
-const outFile = path.join(POSTS_DIR, `${date}.png`);
+const outFile = path.join(POSTS_DIR, `${date}.jpg`);
 await renderPost({ date, classes, templateFile, outFile });
 console.log(`Image: ${outFile}`);
 

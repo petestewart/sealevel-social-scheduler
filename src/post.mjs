@@ -12,12 +12,12 @@ const date = opt("date") ?? tomorrowIso();
 const caption = await readFile(path.join(POSTS_DIR, `${date}.txt`), "utf8");
 
 // The PNG must be publicly reachable before Instagram will accept it.
-// CI commits posts/<date>.png and pushes, then this script waits for the
+// CI commits posts/<date>.jpg and pushes, then this script waits for the
 // raw.githubusercontent.com URL to go live before calling the webhook.
 const repo = process.env.GITHUB_REPOSITORY; // e.g. petestewart/sealevel-social
 const branch = process.env.GITHUB_REF_NAME || "main";
 const imageUrl =
-  opt("image-url") ?? `https://raw.githubusercontent.com/${repo}/${branch}/posts/${date}.png`;
+  opt("image-url") ?? `https://raw.githubusercontent.com/${repo}/${branch}/posts/${date}.jpg`;
 
 if (!opt("image-url") && !repo) {
   console.error("GITHUB_REPOSITORY is not set and no --image-url given.");

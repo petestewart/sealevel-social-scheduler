@@ -7,7 +7,7 @@ Every evening at **7:00pm Pacific**, a GitHub Action:
 1. Pulls **tomorrow's classes** from the same Mindbody schedule widget the website embeds
 2. Picks the next design in a **round-robin of templates** (`templates/`)
 3. Renders a 1080×1350 Instagram-ready PNG with headless Chrome
-4. Commits it to `posts/YYYY-MM-DD.png` (which makes it publicly reachable)
+4. Commits it to `posts/YYYY-MM-DD.jpg` (which makes it publicly reachable)
 5. Sends the image URL + generated caption to a **Make.com webhook**, which posts to Instagram and Facebook (and optionally emails a copy)
 
 No paid services: GitHub Actions and Make's free tier cover a daily post with lots of headroom.
@@ -63,7 +63,7 @@ Preview any template locally (needs Chrome/Chromium):
 ```bash
 npm install
 CHROME_PATH=/path/to/chrome node src/run.mjs --fixture --template template-c.html --date 2026-07-31
-open posts/2026-07-31.png
+open posts/2026-07-31.jpg
 ```
 
 ## Switching to the direct Meta Graph API later
