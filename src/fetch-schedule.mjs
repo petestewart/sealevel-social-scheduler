@@ -35,11 +35,48 @@ export async function fetchSchedule(dateIso) {
     });
     await page.goto(WIDGET_URL, { waitUntil: "domcontentloaded", timeout: 45000 });
 
-    // Wait until actual class times are painted.
+    // Wait for the day view to paint (either class times or the empty-day notice).
+    await page
+      .waitForFunction(
+        () => /\d{1,2}:\d{2}\s*(am|pm)|no available classes/i.test(document.body.innerText),
+        { timeout: 60000 },
+      )
+      .catch(() => {});
+    await page.waitForTimeout(2000);
+
+    // The widget shows ONE day at a time, defaulting to today. Click the
+    // day-strip tab for the target date (tomorrow is always within the strip).
+    const targetDay = Number(dateIso.split("-")[2]);
+    const clicked = await page.evaluate((day) => {
+      const els = Array.from(document.querySelectorAll('button, a, [role="tab"], [role="button"], div, span'));
+      // Prefer an explicit "Go to <date>" link if the current day is empty.
+      const goTo = els.find((e) => {
+        const t = e.textContent.replace(/\s+/g, " ").trim();
+        return /^go to /i.test(t) && new RegExp(`\\b${day}\\b`).test(t) && t.length < 40;
+      });
+      if (goTo) {
+        (goTo.closest("button, a") ?? goTo).click();
+        return "go-to-link";
+      }
+      // Otherwise the day tab: compact element like "Fri 31" / "31".
+      const tab = els.find((e) => {
+        const t = e.textContent.replace(/\s+/g, " ").trim();
+        const m = t.match(/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun|Today)?\s*(\d{1,2})$/i);
+        return m && Number(m[1]) === day;
+      });
+      if (tab) {
+        (tab.closest('button, a, [role="tab"]') ?? tab).click();
+        return "day-tab";
+      }
+      return false;
+    }, targetDay);
+    console.log(`Day navigation: ${clicked || "no clickable day element found"}`);
+
+    // Wait for the target day's content to render.
     await page
       .waitForFunction(
         () => /\d{1,2}:\d{2}\s*(am|pm)/i.test(document.body.innerText),
-        { timeout: 60000 },
+        { timeout: 30000 },
       )
       .catch(() => {});
     await page.waitForTimeout(3000);
