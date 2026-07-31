@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:1080px; height:1350px; overflow:hidden; }
+  body {
+    background:#7b9eaa;
+    font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color:#fbf7f0;
+    position:relative;
+  }
+
+  /* misty depth: slightly darker slate toward the bottom */
+  .mist {
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(251,247,240,0.08) 0%, rgba(123,158,170,0) 30%, rgba(63,92,102,0.22) 100%);
+  }
+
+  /* sea-level line motif: thin horizontal lines drifting across */
+  .sealine { position:absolute; left:0; right:0; height:1px; background:rgba(251,247,240,0.35); }
+  .sealine.l1 { top:398px; }
+  .sealine.l2 { top:410px; opacity:0.5; left:120px; }
+  .sealine.l3 { top:422px; opacity:0.25; left:280px; }
+  .sealine.low1 { top:1176px; background:rgba(251,247,240,0.28); }
+  .sealine.low2 { top:1188px; background:rgba(251,247,240,0.14); left:90px; }
+
+  .inner { position:relative; height:100%; padding:88px 96px 80px; display:flex; flex-direction:column; }
+
+  .logo { display:block; width:600px; height:auto; margin:0 auto; }
+
+  .eyebrow {
+    margin-top:64px; text-align:center;
+    font-size:24px; font-weight:bold; letter-spacing:0.34em; text-transform:uppercase;
+    color:#e1e6db;
+  }
+  .date {
+    margin-top:20px; text-align:center;
+    font-family:Georgia, 'Times New Roman', serif; font-style:italic;
+    font-size:78px; font-weight:400; color:#fbf7f0;
+  }
+
+  .card {
+    margin-top:74px;
+    background:#f2dac4;
+    border-radius:8px;
+    padding:56px 96px 50px 120px;
+    color:#4a4238;
+    flex:1;
+    display:flex; flex-direction:column; justify-content:space-evenly;
+    box-shadow:0 24px 60px rgba(40,64,74,0.25);
+  }
+
+  .row { display:flex; align-items:baseline; gap:48px; padding:10px 0; }
+  .row + .row { border-top:1px solid rgba(199,106,73,0.28); padding-top:34px; margin-top:24px; }
+  .time {
+    font-family:Georgia, serif; font-size:56px; color:#c76a49; width:270px; flex:none;
+    white-space:nowrap;
+  }
+  .time .ampm { font-size:30px; font-style:italic; margin-left:6px; }
+  .what { }
+  .class { font-size:37px; font-weight:300; color:#1c1c1c; letter-spacing:0.01em; }
+  .teacher { font-size:25px; color:#5f574b; margin-top:12px; }
+
+  .footer {
+    margin-top:56px;
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .footer .loc {
+    font-size:22px; font-weight:bold; letter-spacing:0.24em; text-transform:uppercase; color:#e1e6db;
+  }
+  .footer .cta {
+    font-size:22px; font-weight:bold; letter-spacing:0.24em; text-transform:uppercase; color:#fbf7f0;
+    text-decoration:underline wavy #da8263; text-underline-offset:9px; text-decoration-thickness:2px;
+  }
+</style>
+</head>
+<body>
+  <div class="mist"></div>
+  <div class="sealine l1"></div>
+  <div class="sealine l2"></div>
+  <div class="sealine l3"></div>
+  <div class="sealine low1"></div>
+  <div class="sealine low2"></div>
+
+  <div class="inner">
+    <img class="logo" src="{{ASSETS}}/logo-v3.png" alt="Sealevel Hot Yoga">
+
+    <div class="eyebrow">Tomorrow on the mat</div>
+    <div class="date">{{DAY_NAME}}, {{MONTH_DAY}}</div>
+
+    <div class="card">
+      <!--ROW-->
+<div class="row">
+        <div class="time">{{TIME}}<span class="ampm">{{AMPM}}</span></div>
+        <div class="what">
+          <div class="class">{{CLASS_NAME}} &middot; {{DURATION}}</div>
+          <div class="teacher">with {{TEACHER}}</div>
+        </div>
+      </div>
+<!--/ROW-->
+    </div>
+
+    <div class="footer">
+      <div class="loc">Fremont &middot; Seattle</div>
+      <div class="cta">sealevelhotyoga.com</div>
+    </div>
+  </div>
+</body>
+</html>

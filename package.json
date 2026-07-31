@@ -1,0 +1,15 @@
+{
+  "name": "sealevel-social",
+  "private": true,
+  "type": "module",
+  "description": "Automated daily class-schedule posts for Sealevel Hot Yoga",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "daily": "node src/run.mjs",
+    "render": "node src/run.mjs --fixture --skip-post",
+    "post": "node src/post.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "^1.49.0"
+  }
+}

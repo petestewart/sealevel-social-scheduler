@@ -1,0 +1,104 @@
+name: Daily schedule post
+
+on:
+  schedule:
+    # 7:00pm America/Los_Angeles is 02:00 UTC during PDT and 03:00 UTC during PST.
+    # Both crons fire; the guard step below lets only the one matching 7pm local run.
+    - cron: "0 2 * * *"
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Date to post (YYYY-MM-DD, default: tomorrow in LA)"
+        required: false
+      dry_run:
+        description: "Render + commit only, skip posting"
+        type: boolean
+        default: false
+      fixture:
+        description: "Use fixture data instead of the live Mindbody widget"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-post
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Guard — only run at 7pm studio time (scheduled runs)
+        id: guard
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            hour=$(TZ=America/Los_Angeles date +%H)
+            if [ "$hour" != "19" ]; then
+              echo "Not 7pm in Los Angeles (hour=$hour) — this is the off-season cron. Skipping."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.skip != 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.guard.outputs.skip != 'true'
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        if: steps.guard.outputs.skip != 'true'
+        run: npm ci || npm install
+
+      - name: Install Chrome
+        if: steps.guard.outputs.skip != 'true'
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Render tomorrow's post
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node src/run.mjs \
+            ${{ inputs.date && format('--date {0}', inputs.date) || '' }} \
+            ${{ inputs.fixture == true && '--fixture' || '' }}
+
+      - name: Commit rendered image
+        if: steps.guard.outputs.skip != 'true'
+        id: commit
+        run: |
+          git config user.name "sealevel-social-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add posts/*.png posts/*.txt
+          if git diff --cached --quiet; then
+            echo "Nothing new to commit (already rendered today?)."
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Schedule post $(date +%F)"
+            git push
+            echo "committed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post to Instagram + Facebook
+        if: steps.guard.outputs.skip != 'true' && inputs.dry_run != true
+        env:
+          MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+        run: |
+          node src/post.mjs \
+            ${{ inputs.date && format('--date {0}', inputs.date) || '' }}
+
+      - name: Upload debug artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug
+          path: posts/tmp/
+          if-no-files-found: ignore

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:1080px; height:1350px; overflow:hidden; }
+  body {
+    background:#417063;
+    font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color:#fbf7f0;
+    position:relative;
+  }
+  /* wave motif — stacked low-opacity arcs echoing the marque wave */
+  .wave { position:absolute; border-radius:50%; border:3px solid #fbf7f0; }
+  .w1 { width:1600px; height:1600px; left:-500px; top:880px; opacity:0.10; }
+  .w2 { width:1600px; height:1600px; left:-420px; top:960px; opacity:0.07; }
+  .w3 { width:1600px; height:1600px; left:-340px; top:1040px; opacity:0.05; }
+  .swell {
+    position:absolute; width:1900px; height:1900px; border-radius:50%;
+    background:#477c6e; left:-410px; top:930px;
+  }
+  .frame {
+    position:relative;
+    height:100%;
+    padding:92px 96px 84px;
+    display:flex; flex-direction:column;
+    text-align:center;
+  }
+  .logo { display:block; width:560px; height:auto; margin:0 auto; }
+  .head { margin-top:88px; }
+  .eyebrow {
+    font-weight:700; text-transform:uppercase;
+    letter-spacing:0.34em; font-size:23px; color:#e79c80;
+  }
+  .day {
+    font-family:Georgia, 'Times New Roman', serif;
+    font-style:italic; font-weight:400;
+    font-size:120px; line-height:1.05;
+    color:#fbf7f0;
+    margin-top:26px;
+  }
+  .rows {
+    margin-top:auto;
+    width:100%; max-width:800px;
+    margin-left:auto; margin-right:auto;
+  }
+  .row {
+    padding:42px 0;
+    border-top:1px solid rgba(251,247,240,0.22);
+  }
+  .row:first-child { border-top:none; }
+  .time {
+    font-family:Georgia, serif;
+    font-size:50px; color:#e79c80;
+  }
+  .time .ampm { font-style:italic; font-size:28px; margin-left:4px; }
+  .cls {
+    font-weight:300; font-size:38px; color:#fbf7f0;
+    margin-top:12px; letter-spacing:0.02em;
+  }
+  .teacher {
+    font-family:Georgia, serif; font-style:italic;
+    font-size:26px; color:rgba(251,247,240,0.72);
+    margin-top:8px;
+  }
+  .footer {
+    margin-top:64px;
+    display:flex; justify-content:space-between; align-items:baseline;
+    text-align:left;
+  }
+  .loc {
+    font-weight:700; text-transform:uppercase;
+    letter-spacing:0.24em; font-size:21px; color:rgba(251,247,240,0.85);
+  }
+  .cta {
+    font-family:Georgia, serif; font-style:italic;
+    font-size:29px; color:#fbf7f0;
+    text-decoration:underline wavy #e79c80;
+    text-underline-offset:10px;
+    text-decoration-thickness:2px;
+  }
+</style>
+</head>
+<body>
+  <div class="swell"></div>
+  <div class="wave w1"></div>
+  <div class="wave w2"></div>
+  <div class="wave w3"></div>
+  <div class="frame">
+    <img class="logo" src="{{ASSETS}}/logo-v3.png" alt="Sealevel Hot Yoga">
+    <div class="head">
+      <div class="eyebrow">Tomorrow on the mat</div>
+      <div class="day">{{DAY_NAME}}, {{MONTH_DAY}}</div>
+    </div>
+    <div class="rows">
+      <!--ROW-->
+<div class="row">
+        <div class="time">{{TIME}}<span class="ampm">{{AMPM}}</span></div>
+        <div class="cls">{{CLASS_NAME}} &middot; {{DURATION}}</div>
+        <div class="teacher">with {{TEACHER}}</div>
+      </div>
+<!--/ROW-->
+    </div>
+    <div class="footer">
+      <div class="loc">Fremont &middot; Seattle</div>
+      <div class="cta">sealevelhotyoga.com</div>
+    </div>
+  </div>
+</body>
+</html>

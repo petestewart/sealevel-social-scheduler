@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:1080px; height:1350px; overflow:hidden; }
+  body {
+    background:#fbf7f0;
+    font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color:#1c1c1c;
+    position:relative;
+  }
+
+  /* huge soft clay sun rising behind the schedule headline */
+  .sun {
+    position:absolute;
+    width:820px; height:820px;
+    left:340px; top:-130px;
+    background:radial-gradient(circle at 50% 50%, #e79c80 0%, rgba(231,156,128,0.5) 42%, rgba(231,156,128,0.14) 60%, rgba(231,156,128,0) 70%);
+    border-radius:50%;
+  }
+  /* horizon: thin sea-teal line the sun rises over */
+  .horizon {
+    position:absolute; left:470px; right:96px; top:470px;
+    height:2px; background:#61a596; opacity:0.55;
+  }
+
+  .inner { position:relative; height:100%; padding:84px 96px 76px; display:flex; flex-direction:column; }
+
+  .logo { display:block; width:190px; height:auto; }
+
+  .head { margin-top:120px; }
+  .eyebrow {
+    font-size:23px; font-weight:bold; letter-spacing:0.32em; text-transform:uppercase;
+    color:#4f9080;
+  }
+  h1 {
+    margin-top:26px;
+    font-weight:300; font-size:88px; line-height:1.08; color:#1c1c1c; letter-spacing:-0.01em;
+  }
+  h1 em { font-family:Georgia, 'Times New Roman', serif; font-style:italic; color:#c76a49; }
+
+  .list { margin-top:80px; margin-bottom:48px; flex:1; display:flex; flex-direction:column; }
+  .row {
+    flex:1 1 0; min-height:0;
+    display:flex; align-items:center; gap:44px;
+    border-top:1px solid rgba(97,165,150,0.45);
+  }
+  .row:last-child { border-bottom:1px solid rgba(97,165,150,0.45); }
+  .time {
+    font-family:Georgia, serif; font-size:50px; color:#c76a49; width:240px; flex:none; white-space:nowrap;
+  }
+  .time .ampm { font-size:27px; font-style:italic; margin-left:5px; }
+  .class { font-size:33px; font-weight:300; color:#1c1c1c; }
+  .teacher { font-size:24px; color:#5f574b; margin-top:10px; }
+
+  .footer {
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .footer .loc {
+    font-size:21px; font-weight:bold; letter-spacing:0.24em; text-transform:uppercase; color:#5f574b;
+  }
+  .footer .cta {
+    font-size:21px; font-weight:bold; letter-spacing:0.24em; text-transform:uppercase; color:#4f9080;
+    text-decoration:underline wavy #da8263; text-underline-offset:9px; text-decoration-thickness:2px;
+  }
+</style>
+</head>
+<body>
+  <div class="sun"></div>
+  <div class="horizon"></div>
+
+  <div class="inner">
+    <img class="logo" src="{{ASSETS}}/sealevel-logo-marque.png" alt="Sealevel Hot Yoga">
+
+    <div class="head">
+      <div class="eyebrow">Tomorrow &middot; {{DAY_NAME}}, {{MONTH_DAY}}</div>
+      <h1>Up with<br>the <em>sun.</em></h1>
+    </div>
+
+    <div class="list">
+      <!--ROW-->
+<div class="row">
+        <div class="time">{{TIME}}<span class="ampm">{{AMPM}}</span></div>
+        <div class="what">
+          <div class="class">{{CLASS_NAME}} &middot; {{DURATION}}</div>
+          <div class="teacher">with {{TEACHER}}</div>
+        </div>
+      </div>
+<!--/ROW-->
+    </div>
+
+    <div class="footer">
+      <div class="loc">Fremont &middot; Seattle</div>
+      <div class="cta">Reserve your mat</div>
+    </div>
+  </div>
+</body>
+</html>

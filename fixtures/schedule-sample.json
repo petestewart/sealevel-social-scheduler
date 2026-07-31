@@ -1,0 +1,8 @@
+{
+  "date": "2026-07-31",
+  "classes": [
+    { "startTime": "06:00", "endTime": "07:30", "classType": "Hot 26 & 2 (90 min)", "teacher": "Sally Zapata" },
+    { "startTime": "12:00", "endTime": "13:00", "classType": "Hot 26 & 2 (60 min)", "teacher": "Kim Farrell" },
+    { "startTime": "17:00", "endTime": "18:00", "classType": "Hot 26 & 2 (60 min)", "teacher": "Eve Derooy" }
+  ]
+}
