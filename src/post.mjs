@@ -50,10 +50,16 @@ if (igLoginToken) {
   if (!igUserId) throw new Error("IG_LOGIN_USER_ID is required alongside IG_LOGIN_TOKEN.");
   const G = "https://graph.instagram.com/v21.0";
 
+  // Default is a Story (24h, full-screen). Set IG_MEDIA_TYPE=FEED for a grid post.
+  const asStory = (process.env.IG_MEDIA_TYPE || "STORIES").toUpperCase() !== "FEED";
+  const containerBody = { image_url: imageUrl, access_token: igLoginToken };
+  if (asStory) containerBody.media_type = "STORIES"; // captions are ignored on Stories
+  else containerBody.caption = caption;
+
   const containerRes = await fetch(`${G}/${igUserId}/media`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ image_url: imageUrl, caption, access_token: igLoginToken }),
+    body: JSON.stringify(containerBody),
   });
   const container = await containerRes.json();
   if (!container.id) throw new Error(`IG container failed: ${JSON.stringify(container)}`);

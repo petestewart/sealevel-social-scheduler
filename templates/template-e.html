@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  html, body { width:1080px; height:1350px; overflow:hidden; }
+  html, body { width:1080px; height:1920px; overflow:hidden; }
   body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background:#fbf7f0;
     color:#1c1c1c;
     display:flex; flex-direction:column;
   }
-  /* ---- top photo band ---- */
+  /* ---- top photo band (full-bleed into the top IG-UI zone; no content here) ---- */
   .band {
-    height:340px;
+    height:560px;
     background:url('{{ASSETS}}/photos/yoga-mats.jpg') center 42% / cover no-repeat;
     position:relative;
     flex:0 0 auto;
@@ -25,7 +25,7 @@
   }
   /* dot strip echoing mat colors */
   .dots{
-    height:16px; flex:0 0 auto; display:flex;
+    height:18px; flex:0 0 auto; display:flex;
   }
   .dots span{ flex:1; }
   .dots .c2{ flex:1.8; }
@@ -43,7 +43,7 @@
   .content{
     flex:1;
     display:flex; flex-direction:column;
-    padding:44px 96px 0;
+    padding:64px 96px 0;
   }
   .head{
     display:flex; align-items:flex-start; justify-content:space-between;
@@ -51,24 +51,24 @@
   .head-left{ padding-top:8px; }
   .eyebrow{
     font-weight:700; text-transform:uppercase;
-    letter-spacing:0.32em; font-size:22px; color:#c76a49;
-    margin-bottom:18px;
+    letter-spacing:0.32em; font-size:24px; color:#c76a49;
+    margin-bottom:20px;
   }
   h1{
     font-family: Georgia, 'Times New Roman', serif;
     font-style:italic; font-weight:400;
-    font-size:80px; line-height:1.04;
+    font-size:92px; line-height:1.04;
     color:#4f9080;
   }
   h1 .day{ display:block; }
   .marque{
-    width:158px; height:auto; margin-top:6px;
+    width:180px; height:auto; margin-top:6px;
     flex:0 0 auto;
   }
 
   /* ---- class list ---- */
   .rows{
-    margin-top:30px;
+    margin-top:36px;
     flex:1;
     display:flex; flex-direction:column;
     justify-content:space-evenly;
@@ -76,47 +76,53 @@
   }
   .row{
     display:flex; align-items:baseline;
-    padding:22px 0;
+    padding:30px 0;
     border-top:2px solid #ece3d5;
   }
   .row:first-child{ border-top:none; }
   .time{
     font-family:Georgia, serif;
-    font-size:52px; color:#c76a49;
-    width:270px; flex:0 0 auto;
+    font-size:58px; color:#c76a49;
+    width:295px; flex:0 0 auto;
     white-space:nowrap;
   }
-  .time .ampm{ font-size:28px; font-style:italic; margin-left:6px; color:#da8263; }
+  .time .ampm{ font-size:31px; font-style:italic; margin-left:6px; color:#da8263; }
   .what{ flex:1; }
   .cls{
-    font-weight:300; font-size:40px; color:#1c1c1c;
+    font-weight:300; font-size:44px; color:#1c1c1c;
     letter-spacing:0.01em;
   }
   .cls .dur{ color:#7b9eaa; }
   .teacher{
-    margin-top:8px;
+    margin-top:10px;
     font-family:Georgia, serif; font-style:italic;
-    font-size:27px; color:#5f574b;
+    font-size:29px; color:#5f574b;
   }
 
-  /* ---- footer ---- */
+  /* ---- footer (kept above IG's bottom ~300px UI zone) ---- */
   .footer{
     flex:0 0 auto;
-    margin:0 96px;
+    margin:0 96px 302px;
     border-top:2px solid #ece3d5;
-    padding:30px 0 40px;
+    padding:38px 0 0;
     display:flex; align-items:center; justify-content:space-between;
   }
   .place{
     font-weight:700; text-transform:uppercase;
-    letter-spacing:0.26em; font-size:21px; color:#5f574b;
+    letter-spacing:0.26em; font-size:23px; color:#5f574b;
   }
+  .cta-wrap{ text-align:right; }
   .cta{
     font-family:Georgia, serif; font-style:italic;
-    font-size:30px; color:#4f9080;
+    font-size:38px; color:#4f9080;
     text-decoration:underline wavy #da8263;
-    text-underline-offset:10px;
-    text-decoration-thickness:2.5px;
+    text-underline-offset:11px;
+    text-decoration-thickness:3px;
+  }
+  .url{
+    margin-top:20px;
+    font-weight:700; letter-spacing:0.14em;
+    font-size:24px; color:#5f574b;
   }
 </style>
 </head>
@@ -151,7 +157,10 @@
 
   <div class="footer">
     <div class="place">Fremont · Seattle</div>
-    <div class="cta">Reserve your mat</div>
+    <div class="cta-wrap">
+      <div class="cta">Reserve your mat</div>
+      <div class="url">sealevelhotyoga.com</div>
+    </div>
   </div>
 </body>
 </html>

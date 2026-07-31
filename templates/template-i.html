@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  html, body { width:1080px; height:1350px; overflow:hidden; }
+  html, body { width:1080px; height:1920px; overflow:hidden; }
   body {
     background:#7b9eaa;
     font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -20,18 +20,18 @@
 
   /* sea-level line motif: thin horizontal lines drifting across */
   .sealine { position:absolute; left:0; right:0; height:1px; background:rgba(251,247,240,0.35); }
-  .sealine.l1 { top:398px; }
-  .sealine.l2 { top:410px; opacity:0.5; left:120px; }
-  .sealine.l3 { top:422px; opacity:0.25; left:280px; }
-  .sealine.low1 { top:1176px; background:rgba(251,247,240,0.28); }
-  .sealine.low2 { top:1188px; background:rgba(251,247,240,0.14); left:90px; }
+  .sealine.l1 { top:560px; }
+  .sealine.l2 { top:572px; opacity:0.5; left:120px; }
+  .sealine.l3 { top:584px; opacity:0.25; left:280px; }
+  .sealine.low1 { top:1700px; background:rgba(251,247,240,0.28); }
+  .sealine.low2 { top:1712px; background:rgba(251,247,240,0.14); left:90px; }
 
-  .inner { position:relative; height:100%; padding:88px 96px 80px; display:flex; flex-direction:column; }
+  .inner { position:relative; height:100%; padding:262px 96px 310px; display:flex; flex-direction:column; }
 
   .logo { display:block; width:600px; height:auto; margin:0 auto; }
 
   .eyebrow {
-    margin-top:64px; text-align:center;
+    margin-top:78px; text-align:center;
     font-size:24px; font-weight:bold; letter-spacing:0.34em; text-transform:uppercase;
     color:#e1e6db;
   }
@@ -42,36 +42,36 @@
   }
 
   .card {
-    margin-top:74px;
+    margin-top:88px;
     background:#f2dac4;
     border-radius:8px;
-    padding:56px 96px 50px 120px;
+    padding:72px 96px 66px 120px;
     color:#4a4238;
     flex:1;
     display:flex; flex-direction:column; justify-content:space-evenly;
     box-shadow:0 24px 60px rgba(40,64,74,0.25);
   }
 
-  .row { display:flex; align-items:baseline; gap:48px; padding:10px 0; }
-  .row + .row { border-top:1px solid rgba(199,106,73,0.28); padding-top:34px; margin-top:24px; }
+  .row { display:flex; align-items:baseline; gap:48px; padding:14px 0; }
+  .row + .row { border-top:1px solid rgba(199,106,73,0.28); padding-top:46px; margin-top:32px; }
   .time {
-    font-family:Georgia, serif; font-size:56px; color:#c76a49; width:270px; flex:none;
+    font-family:Georgia, serif; font-size:62px; color:#c76a49; width:280px; flex:none;
     white-space:nowrap;
   }
-  .time .ampm { font-size:30px; font-style:italic; margin-left:6px; }
+  .time .ampm { font-size:32px; font-style:italic; margin-left:6px; }
   .what { }
-  .class { font-size:37px; font-weight:300; color:#1c1c1c; letter-spacing:0.01em; }
-  .teacher { font-size:25px; color:#5f574b; margin-top:12px; }
+  .class { font-size:37px; font-weight:300; color:#1c1c1c; letter-spacing:0.01em; white-space:nowrap; }
+  .teacher { font-size:27px; color:#5f574b; margin-top:14px; }
 
   .footer {
-    margin-top:56px;
+    margin-top:64px;
     display:flex; justify-content:space-between; align-items:baseline;
   }
   .footer .loc {
-    font-size:22px; font-weight:bold; letter-spacing:0.24em; text-transform:uppercase; color:#e1e6db;
+    font-size:26px; font-weight:bold; letter-spacing:0.24em; text-transform:uppercase; color:#e1e6db;
   }
   .footer .cta {
-    font-size:22px; font-weight:bold; letter-spacing:0.24em; text-transform:uppercase; color:#fbf7f0;
+    font-size:28px; font-weight:bold; letter-spacing:0.24em; text-transform:uppercase; color:#fbf7f0;
     text-decoration:underline wavy #da8263; text-underline-offset:9px; text-decoration-thickness:2px;
   }
 </style>

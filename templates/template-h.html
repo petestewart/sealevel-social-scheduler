@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  html, body { width:1080px; height:1350px; overflow:hidden; }
+  html, body { width:1080px; height:1920px; overflow:hidden; }
   body {
     font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
     background:linear-gradient(135deg, #c76a49 0%, #da8263 30%, #a9694f 62%, #4a4238 100%);
@@ -12,36 +12,36 @@
   }
   /* soft heat glow */
   .glow {
-    position:absolute; top:-220px; right:-180px; width:820px; height:820px;
+    position:absolute; top:-260px; right:-220px; width:1000px; height:1000px;
     background:radial-gradient(circle, rgba(231,156,128,0.55) 0%, rgba(231,156,128,0) 65%);
     border-radius:50%;
   }
   /* floated figure, duotone-treated */
   .figure {
-    position:absolute; right:-58px; bottom:118px;
-    width:660px; opacity:0.40;
+    position:absolute; right:-70px; bottom:130px;
+    width:780px; opacity:0.40;
     filter:brightness(0) invert(97%) sepia(8%) saturate(300%) hue-rotate(330deg);
   }
   .frame {
-    position:relative; height:1350px;
-    padding:84px 84px 76px 84px;
+    position:relative; height:1920px;
+    padding:260px 90px 320px 90px;
     display:flex; flex-direction:column;
   }
-  .logo { width:520px; display:block; }
+  .logo { width:540px; display:block; }
   .eyebrow {
-    margin-top:78px;
+    margin-top:88px;
     font-weight:700; font-size:21px; letter-spacing:0.34em;
     text-transform:uppercase; color:#fbf7f0; opacity:0.92;
   }
   .day {
     margin-top:16px;
     font-family:Georgia, 'Times New Roman', serif; font-style:italic;
-    font-weight:400; font-size:88px; line-height:1.04; color:#fbf7f0;
+    font-weight:400; font-size:96px; line-height:1.04; color:#fbf7f0;
   }
   /* ---------- class list ---------- */
   .rows {
     flex:1; display:flex; flex-direction:column; justify-content:space-evenly;
-    margin-top:34px; max-width:760px;
+    margin-top:40px; max-width:820px;
   }
   .row {
     display:flex; align-items:baseline; gap:36px;
@@ -70,7 +70,7 @@
     text-transform:uppercase; color:#f2dac4;
   }
   .cta {
-    font-family:Georgia, serif; font-style:italic; font-size:25px; color:#fbf7f0;
+    font-family:Georgia, serif; font-style:italic; font-size:30px; color:#fbf7f0;
     text-decoration:underline wavy #f2dac4;
     text-underline-offset:7px; text-decoration-thickness:2px;
   }

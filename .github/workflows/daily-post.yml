@@ -19,6 +19,11 @@ on:
         description: "Use fixture data instead of the live Mindbody widget"
         type: boolean
         default: false
+      media_type:
+        description: "Instagram media type"
+        type: choice
+        options: [STORIES, FEED]
+        default: STORIES
 
 permissions:
   contents: write
@@ -89,6 +94,7 @@ jobs:
         env:
           IG_LOGIN_TOKEN: ${{ secrets.IG_LOGIN_TOKEN }}
           IG_LOGIN_USER_ID: ${{ secrets.IG_LOGIN_USER_ID }}
+          IG_MEDIA_TYPE: ${{ inputs.media_type || 'STORIES' }}
           MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           META_PAGE_ID: ${{ secrets.META_PAGE_ID }}

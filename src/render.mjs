@@ -67,7 +67,7 @@ export async function renderPost({ date, classes, templateFile, outFile }) {
     args: ["--no-sandbox", "--allow-file-access-from-files"],
   });
   try {
-    const page = await browser.newPage({ viewport: { width: 1080, height: 1350 } });
+    const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
     await page.goto(`file://${tmpHtml}`);
     await page.waitForLoadState("networkidle");
     await page.screenshot({ path: outFile, type: "jpeg", quality: 92 });
