@@ -11,10 +11,10 @@ const OPENERS = [
 ];
 
 const CLOSERS = [
-  "Reserve your mat → link in bio",
+  "Reserve your spot → link in bio",
   "Spots fill up — book ahead at sealevelhotyoga.com",
   "Book your spot at sealevelhotyoga.com",
-  "Grab a mat → sealevelhotyoga.com",
+  "Grab a spot → sealevelhotyoga.com",
 ];
 
 const HASHTAGS =
