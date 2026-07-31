@@ -3,23 +3,20 @@ import path from "node:path";
 import { chromium } from "playwright-core";
 import { POSTS_DIR, ROOT, chromePath } from "./lib.mjs";
 
-// Where the Mindbody "Branded web tools" Schedules widget is embedded.
-// Strategy 1 loads the studio's real schedule page (the widget refuses to
-// initialize on pages without a proper http(s) origin, so a synthetic
-// about:blank page does NOT work). Strategy 2 serves a minimal embed page
-// on a faked origin via request interception, in case the site is down.
-const SCHEDULE_PAGE_URL =
-  process.env.SCHEDULE_PAGE_URL || "https://www.sealevelhotyoga.com/schedule";
+// The Mindbody widget embedded on the studio site is just an iframe pointing at
+// this standalone schedule page — load it directly and parse its rendered text.
 const WIDGET_ID = process.env.MINDBODY_WIDGET_ID || "a2567440024";
+const WIDGET_URL = `https://go.mindbodyonline.com/book/widgets/schedules/view/${WIDGET_ID}/schedule`;
 
-const FAKE_EMBED_URL = new URL("/__schedule-embed", SCHEDULE_PAGE_URL).href;
-const EMBED_HTML = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>
-<div class="mindbody-widget" data-widget-type="Schedules" data-widget-id="${WIDGET_ID}"></div>
-<script src="https://brandedweb.mindbodyonline.com/embed/widget.js" async></script>
-</body></html>`;
-
-const SESSION_SELECTOR =
-  '.bw-session, [class*="bw-session"], [class*="session-item"], [class*="ClassTime"], [class*="hc_class"]';
+const MONTHS = {
+  january: 1, february: 2, march: 3, april: 4, may: 5, june: 6, july: 7,
+  august: 8, september: 9, october: 10, november: 11, december: 12,
+  jan: 1, feb: 2, mar: 3, apr: 4, jun: 6, jul: 7, aug: 8, sep: 9, sept: 9,
+  oct: 10, nov: 11, dec: 12,
+};
+const MONTH_RE = new RegExp(`\\b(${Object.keys(MONTHS).join("|")})\\.?\\s+(\\d{1,2})\\b`, "i");
+const TIME_RE = /^(\d{1,2}):(\d{2})\s*(am|pm)/i;
+const SKIP_RE = /^(book|reserve|waitlist|sign\s?up|sold out|full|free|cancel|\$|\d+\s*(min|minutes)$|filter|today|powered by|mindbody)/i;
 
 /**
  * @param {string} dateIso the date to keep classes for (YYYY-MM-DD)
@@ -28,130 +25,103 @@ const SESSION_SELECTOR =
 export async function fetchSchedule(dateIso) {
   const browser = await chromium.launch({
     executablePath: chromePath(),
-    // Mindbody's CDN applies bot checks; look like a regular desktop Chrome.
     args: ["--no-sandbox", "--disable-blink-features=AutomationControlled"],
   });
   try {
-    const attempts = [];
-
-    // Strategy 1: the studio's real schedule page.
-    let result = await scrapePage(browser, dateIso, async (page) => {
-      await page.goto(SCHEDULE_PAGE_URL, { waitUntil: "domcontentloaded", timeout: 45000 });
+    const page = await browser.newPage({
+      viewport: { width: 1280, height: 3000 },
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     });
-    attempts.push({ strategy: `real page ${SCHEDULE_PAGE_URL}`, ...result });
+    await page.goto(WIDGET_URL, { waitUntil: "domcontentloaded", timeout: 45000 });
 
-    // Strategy 2: minimal embed served on a faked same-site origin.
-    if (result.classes.length === 0) {
-      result = await scrapePage(browser, dateIso, async (page) => {
-        await page.route(FAKE_EMBED_URL, (route) =>
-          route.fulfill({ contentType: "text/html", body: EMBED_HTML }),
-        );
-        await page.goto(FAKE_EMBED_URL, { waitUntil: "domcontentloaded", timeout: 45000 });
-      });
-      attempts.push({ strategy: "faked-origin embed", ...result });
-    }
+    // Wait until actual class times are painted.
+    await page
+      .waitForFunction(
+        () => /\d{1,2}:\d{2}\s*(am|pm)/i.test(document.body.innerText),
+        { timeout: 60000 },
+      )
+      .catch(() => {});
+    await page.waitForTimeout(3000);
 
-    if (result.classes.length === 0) {
+    const text = await page.evaluate(() => document.body.innerText);
+    const { classes, datesSeen, total } = parseScheduleText(text, dateIso);
+
+    if (classes.length === 0) {
       const dbgDir = path.join(POSTS_DIR, "tmp");
       await mkdir(dbgDir, { recursive: true });
       const dbg = path.join(dbgDir, "widget-debug.html");
-      await writeFile(
-        dbg,
-        attempts
-          .map((a) => `<!-- strategy: ${a.strategy}; sessions matched: ${a.rawCount} -->\n${a.html}`)
-          .join("\n\n<!-- ================= -->\n\n"),
-      );
+      await writeFile(dbg, `<!-- ${WIDGET_URL}; sessions parsed: ${total}; dates seen: ${datesSeen.join(", ") || "none"} -->\n<pre>\n${text}\n</pre>`);
       throw new Error(
-        `Could not parse any classes for ${dateIso} from the Mindbody widget ` +
-          `(tried: ${attempts.map((a) => a.strategy).join("; ")}). ` +
-          `Raw HTML saved to ${path.relative(ROOT, dbg)} — inspect it and adjust src/fetch-schedule.mjs.`,
+        total > 0
+          ? `Parsed ${total} sessions from the widget but none dated ${dateIso} (dates seen: ${datesSeen.join(", ")}). Widget text saved to ${path.relative(ROOT, dbg)}.`
+          : `Could not parse any classes from ${WIDGET_URL}. Widget text saved to ${path.relative(ROOT, dbg)} — adjust the parser in src/fetch-schedule.mjs.`,
       );
     }
-    return result.classes;
+    return classes;
   } finally {
     await browser.close();
   }
 }
 
-async function scrapePage(browser, dateIso, navigate) {
-  const page = await browser.newPage({
-    viewport: { width: 1280, height: 2400 },
-    userAgent:
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-  });
-  // Surface what the widget's network calls are doing — visible in CI logs.
-  page.on("response", (res) => {
-    const u = res.url();
-    if (/mindbody|brandedweb|healcode/i.test(u)) {
-      console.log(`  [net] ${res.status()} ${u.slice(0, 140)}`);
+/**
+ * Parse the widget's rendered text. Structure: day headers containing a month
+ * name + day number, followed by session blocks of [time range, class name,
+ * teacher]. Exposed for testing.
+ */
+export function parseScheduleText(text, dateIso) {
+  const [, tm, td] = dateIso.split("-").map(Number);
+  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+
+  const all = [];
+  const datesSeen = [];
+  let onTargetDate = false;
+  let sawAnyDate = false;
+  let totalSessions = 0;
+  let cur = null;
+
+  const push = () => {
+    if (cur && cur.classType) all.push(cur);
+    cur = null;
+  };
+
+  for (const line of lines) {
+    const dm = line.match(MONTH_RE);
+    if (dm && !TIME_RE.test(line)) {
+      push();
+      sawAnyDate = true;
+      const label = `${dm[1]} ${dm[2]}`;
+      if (!datesSeen.includes(label)) datesSeen.push(label);
+      onTargetDate = MONTHS[dm[1].toLowerCase().replace(".", "")] === tm && Number(dm[2]) === td;
+      continue;
     }
-  });
-  page.on("pageerror", (err) => console.log(`  [pageerror] ${String(err).slice(0, 200)}`));
-  try {
-    await navigate(page);
 
-    // The widget injects content asynchronously — wait for real session elements.
-    await page.waitForSelector(SESSION_SELECTOR, { timeout: 60000 }).catch(() => {});
-    // Let it finish painting the rest of the sessions.
-    await page.waitForTimeout(5000);
-
-    const scraped = await page.evaluate((sel) => {
-      const sessions = [];
-      for (const el of document.querySelectorAll(sel)) {
-        // Skip container elements that themselves contain matched sessions.
-        if (el.querySelector(sel)) continue;
-        const q = (s) => el.querySelector(s)?.textContent?.trim() ?? "";
-        const dayContainer = el.closest('[class*="day"], [data-date], [class*="Day"]');
-        sessions.push({
-          time:
-            q('[class*="time"], [class*="Time"]') ||
-            (el.textContent.match(/\b\d{1,2}:\d{2}\s*(?:am|pm)\b/i) || [""])[0],
-          name: q('[class*="name"], [class*="title"], [class*="Name"], h3, h4'),
-          staff: q('[class*="staff"], [class*="teacher"], [class*="instructor"], [class*="Staff"]'),
-          day:
-            dayContainer?.getAttribute?.("data-date") ||
-            dayContainer?.querySelector('[class*="header"], [class*="date"], h2, h3')?.textContent?.trim() ||
-            "",
-        });
+    const t = line.match(TIME_RE);
+    if (t) {
+      push();
+      totalSessions++;
+      // If the widget has no date headers at all, accept every session.
+      if (onTargetDate || !sawAnyDate) {
+        let h = Number(t[1]) % 12;
+        if (/pm/i.test(t[3])) h += 12;
+        cur = { startTime: `${String(h).padStart(2, "0")}:${t[2]}`, matchesDate: onTargetDate || !sawAnyDate };
       }
-      const widget =
-        document.querySelector(".mindbody-widget") ||
-        document.querySelector('[class*="bw-widget"]');
-      return { sessions, html: widget?.outerHTML ?? document.body.innerHTML };
-    }, SESSION_SELECTOR);
+      continue;
+    }
 
-    return {
-      classes: normalize(scraped.sessions, dateIso),
-      rawCount: scraped.sessions.length,
-      html: scraped.html,
-    };
-  } finally {
-    await page.close();
+    if (!cur || SKIP_RE.test(line)) continue;
+    if (!cur.classType) {
+      cur.classType = line;
+    } else if (!cur.teacher && /^[a-z .'-]+$/i.test(line) && line.length < 40) {
+      cur.teacher = line.replace(/^with\s+/i, "");
+      push();
+    }
   }
-}
+  push();
 
-/** Map scraped rows to {startTime, classType, teacher}, filtered to dateIso. */
-function normalize(sessions, dateIso) {
-  const target = new Date(`${dateIso}T12:00:00Z`);
-  const targetDay = target.getUTCDate();
-  const out = [];
-  for (const s of sessions) {
-    const t = (s.time.match(/(\d{1,2}):(\d{2})\s*(am|pm)/i) || []).slice(1);
-    if (t.length === 0) continue;
-    // Keep sessions whose day header mentions the target day-of-month (or that have
-    // no day info, which happens when the widget is set to single-day view).
-    if (s.day && !new RegExp(`\\b${targetDay}\\b`).test(s.day)) continue;
-    let h = Number(t[0]) % 12;
-    if (/pm/i.test(t[2])) h += 12;
-    out.push({
-      startTime: `${String(h).padStart(2, "0")}:${t[1]}`,
-      classType: s.name || "Hot Yoga",
-      teacher: (s.staff || "").replace(/^with\s+/i, ""),
-    });
-  }
-  // De-dupe (widgets often render duplicate session nodes for responsive layouts).
   const seen = new Set();
-  return out
+  const classes = all
+    .map(({ startTime, classType, teacher }) => ({ startTime, classType, teacher: teacher ?? "" }))
     .filter((c) => {
       const k = `${c.startTime}|${c.classType}|${c.teacher}`;
       if (seen.has(k)) return false;
@@ -159,6 +129,8 @@ function normalize(sessions, dateIso) {
       return true;
     })
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  return { classes, datesSeen, total: totalSessions };
 }
 
 /** Load the checked-in fixture instead of the live widget. */
