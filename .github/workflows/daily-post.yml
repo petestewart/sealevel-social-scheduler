@@ -2,10 +2,15 @@ name: Daily schedule post
 
 on:
   schedule:
-    # 7:00pm America/Los_Angeles is 02:00 UTC during PDT and 03:00 UTC during PST.
-    # Both crons fire; the guard step below lets only the one matching 7pm local run.
-    - cron: "0 2 * * *"
-    - cron: "0 3 * * *"
+    # Target: ~7:00pm America/Los_Angeles (02:00 UTC in PDT, 03:00 UTC in PST).
+    # GitHub cron drifts badly (hours under load), so fire several attempts at
+    # offset minutes; the guard accepts a wide evening window and a marker file
+    # ensures only the FIRST successful attempt posts each day.
+    - cron: "3 2 * * *"
+    - cron: "33 2 * * *"
+    - cron: "3 3 * * *"
+    - cron: "33 3 * * *"
+    - cron: "3 4 * * *"
   workflow_dispatch:
     inputs:
       date:
@@ -36,19 +41,24 @@ jobs:
   post:
     runs-on: ubuntu-latest
     steps:
-      - name: Guard — only run at 7pm studio time (scheduled runs)
+      - uses: actions/checkout@v4
+
+      - name: Guard — evening window + not already posted (scheduled runs)
         id: guard
         run: |
+          target="${{ inputs.date }}"
+          [ -z "$target" ] && target=$(TZ=America/Los_Angeles date -d tomorrow +%F)
+          echo "target=$target" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" = "schedule" ]; then
             hour=$(TZ=America/Los_Angeles date +%H)
-            if [ "$hour" != "19" ]; then
-              echo "Not 7pm in Los Angeles (hour=$hour) — this is the off-season cron. Skipping."
+            if [ "$hour" -lt 19 ] || [ "$hour" -gt 22 ]; then
+              echo "Outside the 7-11pm LA window (hour=$hour). Skipping."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+            elif [ -f "posts/$target.posted" ]; then
+              echo "Already posted for $target (marker exists). Skipping."
               echo "skip=true" >> "$GITHUB_OUTPUT"
             fi
           fi
-
-      - uses: actions/checkout@v4
-        if: steps.guard.outputs.skip != 'true'
 
       - uses: actions/setup-node@v4
         if: steps.guard.outputs.skip != 'true'
@@ -102,6 +112,14 @@ jobs:
         run: |
           node src/post.mjs \
             ${{ inputs.date && format('--date {0}', inputs.date) || '' }}
+
+      - name: Record posted marker
+        if: steps.guard.outputs.skip != 'true' && inputs.dry_run != true
+        run: |
+          touch "posts/${{ steps.guard.outputs.target }}.posted"
+          git add posts/
+          git pull --rebase origin main || true
+          git commit -m "Posted marker ${{ steps.guard.outputs.target }}" && git push || echo "marker already recorded"
 
       # Email fallback/preview: needs GMAIL_ADDRESS + GMAIL_APP_PASSWORD secrets.
       # Sends the finished image + caption to your inbox at 7pm — post from the
