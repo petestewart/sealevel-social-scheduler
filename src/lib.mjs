@@ -17,10 +17,15 @@ export function nowInStudioTz() {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
+    minute: "2-digit",
     hour12: false,
   }).formatToParts(new Date());
   const get = (t) => parts.find((p) => p.type === t)?.value;
-  return { iso: `${get("year")}-${get("month")}-${get("day")}`, hour: Number(get("hour")) };
+  return {
+    iso: `${get("year")}-${get("month")}-${get("day")}`,
+    hour: Number(get("hour")),
+    hhmm: `${get("hour")}:${get("minute")}`,
+  };
 }
 
 /** ISO date string for tomorrow in the studio timezone. */

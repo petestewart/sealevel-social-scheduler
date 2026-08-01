@@ -7,7 +7,9 @@
   "scripts": {
     "daily": "node src/run.mjs",
     "render": "node src/run.mjs --fixture --skip-post",
-    "post": "node src/post.mjs"
+    "post": "node src/post.mjs",
+    "scheduler": "node src/scheduler.mjs",
+    "scheduler:dry": "node src/scheduler.mjs --dry-run"
   },
   "dependencies": {
     "playwright-core": "^1.49.0"

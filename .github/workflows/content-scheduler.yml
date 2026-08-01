@@ -1,0 +1,58 @@
+name: Content scheduler
+
+on:
+  schedule:
+    # Hourly. The scheduler is idempotent (state lives in content/ manifests),
+    # so GitHub cron drift or duplicate fires are harmless — anything due
+    # simply posts on the next run that gets through.
+    - cron: "7 * * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Report what would post without publishing or writing state"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: content-scheduler
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # No npm install / Chrome needed: images are pre-made, the scheduler
+      # only uses Node built-ins.
+      - name: Publish due content
+        env:
+          IG_LOGIN_TOKEN: ${{ secrets.IG_LOGIN_TOKEN }}
+          IG_LOGIN_USER_ID: ${{ secrets.IG_LOGIN_USER_ID }}
+          MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+        run: |
+          node src/scheduler.mjs ${{ inputs.dry_run == true && '--dry-run' || '' }}
+
+      - name: Commit updated content state
+        if: inputs.dry_run != true
+        run: |
+          git config user.name "sealevel-social-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add content/
+          if git diff --cached --quiet; then
+            echo "Nothing posted this run."
+          else
+            git commit -m "Content scheduler: mark posted $(date -u +'%F %H:%M')"
+            git pull --rebase origin main
+            git push
+          fi

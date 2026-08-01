@@ -66,6 +66,28 @@ CHROME_PATH=/path/to/chrome node src/run.mjs --fixture --template template-c.htm
 open posts/2026-07-31.jpg
 ```
 
+## Scheduled one-off posts & the story queue
+
+Beyond the automated daily schedule post, the **Content scheduler** workflow
+(hourly) publishes hand-made content from plain files in `content/`:
+
+- **One-off scheduled posts** (`content/scheduled/`) — drop in an image + a
+  small JSON manifest saying when to post it, as a feed post or story:
+  September class announcements, teacher features, promos, trainings, retreats.
+- **Story queue** (`content/story-queue/`) — an ordered pile of story images
+  drained automatically at configurable times each day (default: 3/day).
+
+Commit + push to `main` and the scheduler takes it from there, writing
+`postedAt` back into the manifests as the record of what went out. The
+manifests are the whole API, so a future UI just needs to write these files.
+See [`content/README.md`](content/README.md) for the file formats.
+
+Test locally or from Actions with a dry run:
+
+```bash
+npm run scheduler:dry   # prints what would post right now, publishes nothing
+```
+
 ## Switching to the direct Meta Graph API later
 
 Delete the `MAKE_WEBHOOK_URL` secret and add `META_ACCESS_TOKEN`, `META_PAGE_ID`,
