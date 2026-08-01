@@ -15,50 +15,50 @@
     /* Story-safe: IG UI covers top ~250px and bottom ~300px */
     padding:250px 110px 300px;
   }
-  .logo{ width:480px; height:auto; flex:0 0 auto; }
+  .logo{ width:430px; height:auto; flex:0 0 auto; }
 
   /* ---- arched inset photo ---- */
   .arch-wrap{
-    margin-top:72px;
+    margin-top:40px;
     flex:0 0 auto;
     position:relative;
   }
   .arch{
-    width:410px; height:500px;
+    width:300px; height:345px;
     object-fit:cover;
-    border-radius:205px 205px 0 0;
+    border-radius:150px 150px 0 0;
     display:block;
-    border:9px solid #f1ece2;
+    border:7px solid #f1ece2;
     box-shadow:0 24px 60px rgba(0,0,0,0.35);
     filter:sepia(0.12) brightness(1.02);
   }
   /* faint echo arch behind, offset */
   .arch-wrap::before{
     content:'';
-    position:absolute; top:-20px; left:-24px;
-    width:428px; height:520px;
+    position:absolute; top:-16px; left:-20px;
+    width:316px; height:361px;
     border:2px solid rgba(231,156,128,0.45);
     border-bottom:none;
-    border-radius:215px 215px 0 0;
+    border-radius:158px 158px 0 0;
   }
 
   /* ---- heading ---- */
   .eyebrow{
-    margin-top:62px;
+    margin-top:36px;
     font-weight:700; text-transform:uppercase;
-    letter-spacing:0.34em; font-size:23px; color:#e79c80;
+    letter-spacing:0.26em; font-size:34px; color:#e79c80;
   }
   h1{
-    margin-top:18px;
+    margin-top:12px;
     font-family:Georgia, 'Times New Roman', serif;
     font-style:italic; font-weight:400;
-    font-size:76px; color:#fbf7f0;
+    font-size:74px; color:#fbf7f0;
     letter-spacing:0.01em;
   }
 
   /* ---- class list ---- */
   .rows{
-    margin-top:24px;
+    margin-top:16px;
     flex:1;
     width:100%;
     display:flex; flex-direction:column;
@@ -66,27 +66,27 @@
   }
   .row{
     display:flex; align-items:baseline; justify-content:center;
-    gap:36px;
-    padding:20px 0;
+    gap:32px;
+    padding:14px 0;
     border-top:1px solid rgba(251,247,240,0.16);
   }
   .row:first-child{ border-top:none; }
   .time{
     font-family:Georgia, serif;
-    font-size:47px; color:#e79c80;
-    width:235px; flex:0 0 auto; text-align:right;
+    font-size:64px; color:#e79c80;
+    width:305px; flex:0 0 auto; text-align:right;
     white-space:nowrap;
   }
-  .time .ampm{ font-size:26px; font-style:italic; margin-left:5px; opacity:0.85; }
-  .what{ width:470px; flex:0 0 auto; text-align:left; }
+  .time .ampm{ font-size:34px; font-style:italic; margin-left:5px; opacity:0.9; }
+  .what{ width:520px; flex:0 0 auto; text-align:left; }
   .cls{
-    font-weight:300; font-size:36px; color:#fbf7f0;
+    font-weight:400; font-size:52px; color:#fbf7f0;
   }
-  .cls .dur{ color:rgba(251,247,240,0.55); }
+  .cls .dur{ color:rgba(251,247,240,0.8); }
   .teacher{
     margin-top:6px;
     font-family:Georgia, serif; font-style:italic;
-    font-size:25px; color:rgba(251,247,240,0.6);
+    font-size:38px; color:rgba(251,247,240,0.92);
   }
 
   /* ---- footer (bottom of the safe zone, above IG's ~300px UI strip) ---- */
@@ -94,12 +94,12 @@
     flex:0 0 auto;
     width:100%;
     border-top:1px solid rgba(251,247,240,0.16);
-    padding:36px 0 0;
+    padding:26px 0 0;
     display:flex; align-items:center; justify-content:space-between;
   }
   .place{
     font-weight:700; text-transform:uppercase;
-    letter-spacing:0.26em; font-size:21px; color:rgba(251,247,240,0.66);
+    letter-spacing:0.2em; font-size:30px; color:rgba(251,247,240,0.92);
   }
   .cta{
     font-family:Georgia, serif; font-style:italic;
