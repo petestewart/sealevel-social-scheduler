@@ -1,0 +1,25 @@
+name: Debug Instagram token
+
+on:
+  push:
+    paths:
+      - ".github/workflows/debug-token.yml"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check token against graph.instagram.com
+        env:
+          IG_LOGIN_TOKEN: ${{ secrets.IG_LOGIN_TOKEN }}
+          IG_LOGIN_USER_ID: ${{ secrets.IG_LOGIN_USER_ID }}
+        run: |
+          echo "=== /me (identity) ==="
+          curl -s "https://graph.instagram.com/v21.0/me?fields=id,username,account_type&access_token=${IG_LOGIN_TOKEN}" | head -c 2000
+          echo
+          echo "=== /{user}/media (read perms) ==="
+          curl -s "https://graph.instagram.com/v21.0/${IG_LOGIN_USER_ID}/media?limit=1&access_token=${IG_LOGIN_TOKEN}" | head -c 2000
+          echo
+          echo "=== refresh_access_token (token liveness) ==="
+          curl -s "https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${IG_LOGIN_TOKEN}" | python3 -c "import json,sys; d=json.load(sys.stdin); print({k: (v if k!='access_token' else '<redacted>') for k,v in d.items()})"
