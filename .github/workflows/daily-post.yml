@@ -11,6 +11,13 @@ on:
     - cron: "3 3 * * *"
     - cron: "33 3 * * *"
     - cron: "3 4 * * *"
+  # Primary trigger: an external scheduler pushes trigger/fire at ~7pm LA.
+  # Push events start workflows within seconds (no cron queue), unlike
+  # schedule. The guard still enforces the once-per-day marker, so a
+  # delayed cron landing after a push can't double-post (and vice versa).
+  push:
+    paths:
+      - "trigger/fire"
   workflow_dispatch:
     inputs:
       date:
@@ -54,10 +61,12 @@ jobs:
             if [ "$hour" -lt 19 ] || [ "$hour" -gt 22 ]; then
               echo "Outside the 7-11pm LA window (hour=$hour). Skipping."
               echo "skip=true" >> "$GITHUB_OUTPUT"
-            elif [ -f "posts/$target.posted" ]; then
-              echo "Already posted for $target (marker exists). Skipping."
-              echo "skip=true" >> "$GITHUB_OUTPUT"
             fi
+          fi
+          # Trigger pushes are deliberate (no window), but never post twice.
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ] && [ -f "posts/$target.posted" ]; then
+            echo "Already posted for $target (marker exists). Skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: actions/setup-node@v4
