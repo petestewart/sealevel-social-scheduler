@@ -1,0 +1,22 @@
+name: One-off Story post
+
+# Post any image in this repo as an Instagram Story: commit the image, write
+# its repo-relative path into trigger/story, and push. Fires within seconds.
+on:
+  push:
+    paths:
+      - "trigger/story"
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Post the image as a Story
+        env:
+          IG_LOGIN_TOKEN: ${{ secrets.IG_LOGIN_TOKEN }}
+          IG_LOGIN_USER_ID: ${{ secrets.IG_LOGIN_USER_ID }}
+        run: node src/post-story.mjs "$(head -n1 trigger/story)"
