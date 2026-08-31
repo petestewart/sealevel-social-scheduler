@@ -1,78 +1,85 @@
 # External nightly pinger
 
-The daily-post workflow's most reliable trigger is an outside "clock" telling
-GitHub to run it (GitHub's own cron scheduler drifts by hours or skips nights
-entirely). Anything that can make one HTTPS request per day can be that clock.
-This directory contains everything needed to run it from your own server, or
-from a free hosted cron service.
+The daily-post workflow's most reliable trigger is an outside clock telling
+GitHub to run it — GitHub's own cron scheduler drifts by hours or skips nights
+entirely. Anything that can make one HTTPS request per day can be that clock.
 
-The request is a GitHub `repository_dispatch` call. It's idempotent — the
+The request is a GitHub `repository_dispatch` call. It's idempotent: the
 workflow's `posts/<date>.posted` marker means duplicate or overlapping
-triggers can never double-post, so it's fine (even good) to run this *in
-addition to* any other trigger.
+triggers can never double-post, so it's safe to run this alongside any other
+trigger.
 
-## Step 1 — create the token (one time)
+Three ways to run it, in order of preference.
 
-1. GitHub → Settings → Developer settings → **Fine-grained personal access
-   tokens** → Generate new token.
-2. Repository access: **Only select repositories** → `sealevel-social-scheduler`.
-3. Permissions → Repository permissions → **Contents: Read and write**.
-   (That's the only permission `repository_dispatch` needs.)
-4. Expiration: pick the longest you're comfortable with, and calendar a
-   reminder to rotate it.
+## Option A — Railway cron service (recommended)
 
-Never commit this token, paste it in chat, or put it in cron-job.org's URL —
-it goes only in a header (hosted service) or a `chmod 600` file (own server).
+Uses `server/fire-nightly.mjs` (Node 18+, no dependencies). Railway cron
+schedules are UTC, which would drift an hour at DST, so the service is
+scheduled hourly across the candidate window and the script itself only fires
+when it is actually 7pm in America/Los_Angeles. DST handles itself.
 
-## Option A — your own server (cron)
+1. Railway → New → **Deploy from GitHub repo** → `sealevel-social-scheduler`.
+2. Settings → **Start Command**: `node server/fire-nightly.mjs`
+3. Settings → **Cron Schedule**: `0 2-4 * * *`
+4. Variables → add `GH_DISPATCH_TOKEN` = the fine-grained PAT (see below).
+5. Deploy. To test immediately, add `FORCE=1`, redeploy, check the logs for
+   `dispatched nightly-post OK`, then remove `FORCE`.
+
+Optional variables: `FIRE_AT_HOUR` (default `19`), `FIRE_TZ` (default
+`America/Los_Angeles`), `GH_REPO`.
+
+## Option B — any Linux box (cron)
 
 ```bash
-# 1. Get the script onto the server
 git clone --depth 1 https://github.com/petestewart/sealevel-social-scheduler /opt/sealevel
-chmod +x /opt/sealevel/server/fire-nightly.sh
-
-# 2. Store the token (readable only by your user)
 mkdir -p ~/.config/sealevel
 printf '%s\n' 'github_pat_XXXX' > ~/.config/sealevel/gh-token
 chmod 600 ~/.config/sealevel/gh-token
+/opt/sealevel/server/fire-nightly.sh   # test — expect "dispatched nightly-post OK"
 
-# 3. Test it once — you should see "dispatched nightly-post OK",
-#    and a "Daily schedule post" run appear in the repo's Actions tab
-/opt/sealevel/server/fire-nightly.sh
-
-# 4. Schedule it: crontab -e, then add
+# crontab -e
 CRON_TZ=America/Los_Angeles
 0 19 * * * /opt/sealevel/server/fire-nightly.sh >> ~/.config/sealevel/fire.log 2>&1
 ```
 
-`CRON_TZ` keeps it at 7:00pm Pacific across DST changes (supported by
-cronie/vixie-cron on most Linux distros; on systems without it, use a systemd
-timer with `Timezone=America/Los_Angeles`, or set the server's TZ).
+`CRON_TZ` keeps it at 7pm Pacific across DST (cronie/vixie-cron). On systems
+without it, use a systemd timer with `Timezone=America/Los_Angeles`.
 
-## Option B — cron-job.org (free hosted, no server needed)
+## Option C — cron-job.org (hosted, free, no infrastructure)
 
-1. Create a job at https://cron-job.org:
-   - **URL:** `https://api.github.com/repos/petestewart/sealevel-social-scheduler/dispatches`
-   - **Schedule:** daily at 19:00, timezone `America/Los_Angeles` (they handle DST)
-   - **Advanced → Request method:** `POST`
-   - **Advanced → Request body:** `{"event_type":"nightly-post"}`
-   - **Advanced → Headers:**
-     - `Authorization: Bearer github_pat_XXXX`
-     - `Accept: application/vnd.github+json`
-     - `X-GitHub-Api-Version: 2022-11-28`
-2. Use "Test run" — success is HTTP **204** (empty body), and a
-   "Daily schedule post" run appears in the Actions tab within seconds.
-3. Turn on failure notifications in the job settings so you get an email if
-   the ping itself ever fails.
+Only worth it if there's nowhere to host. It means storing a GitHub token on
+a third-party service, so scope the token tightly and rotate it if you stop
+using them.
 
-## How it fits with the other triggers
+- **URL:** `https://api.github.com/repos/petestewart/sealevel-social-scheduler/dispatches`
+- **Schedule:** daily 19:00, timezone `America/Los_Angeles`
+- **Method:** `POST` — **Body:** `{"event_type":"nightly-post"}`
+- **Headers:** `Authorization: Bearer github_pat_XXXX`,
+  `Accept: application/vnd.github+json`,
+  `X-GitHub-Api-Version: 2022-11-28`
+- Success on "Test run" is HTTP **204** with an empty body.
+
+## The token (needed by all three)
+
+GitHub → Settings → Developer settings → **Fine-grained personal access
+tokens** → Generate new token:
+
+- Repository access: **Only select repositories** → `sealevel-social-scheduler`
+- Permissions → Repository permissions → **Contents: Read and write**
+
+That single permission is all `repository_dispatch` needs. The token can't
+touch any other repo, can't read secrets, and can't change settings. Never
+commit it — it goes in a Railway variable, a `chmod 600` file, or a request
+header.
+
+## How the triggers fit together
 
 | Trigger | Role |
 | --- | --- |
-| This pinger (`repository_dispatch`) | Primary clock once set up |
-| Claude session push to `trigger/fire` | Current nightly clock; can stand down to verify-only |
-| 5 GitHub `schedule` crons | Best-effort backup (often late/skipped) |
+| External pinger (`repository_dispatch`) | Primary clock once set up |
+| Claude session push to `trigger/fire` | Current clock; drops to verify-only after |
+| 5 GitHub `schedule` crons | Best-effort backup (often late or skipped) |
 | `workflow_dispatch` | Manual runs from the Actions tab |
 
-All of them funnel into the same guard: first one to run each evening posts
-and commits `posts/<date>.posted`; every later trigger that day is a no-op.
+All funnel into the same guard: the first trigger each evening posts and
+commits `posts/<date>.posted`; every later one that day is a no-op.
