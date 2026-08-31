@@ -5,6 +5,7 @@
   "description": "Automated daily class-schedule posts for Sealevel Hot Yoga",
   "engines": { "node": ">=20" },
   "scripts": {
+    "start": "node server/fire-nightly.mjs",
     "daily": "node src/run.mjs",
     "render": "node src/run.mjs --fixture --skip-post",
     "post": "node src/post.mjs"
