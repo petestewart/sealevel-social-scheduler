@@ -18,6 +18,12 @@ on:
   push:
     paths:
       - "trigger/fire"
+  # External pinger trigger: any scheduler that can curl the GitHub API
+  # (cron-job.org, a cron job on our own server — see server/README.md)
+  # fires this with event_type "nightly-post". Same marker guard applies,
+  # so overlapping triggers can never double-post.
+  repository_dispatch:
+    types: [nightly-post]
   workflow_dispatch:
     inputs:
       date:
