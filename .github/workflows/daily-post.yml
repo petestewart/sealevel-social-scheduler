@@ -110,6 +110,10 @@ jobs:
             echo "committed=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "Schedule post $(date +%F)"
+            # Another trigger may have pushed to main while we were rendering
+            # (a nightly trigger/fire commit takes ~seconds, a render ~minutes).
+            # Rebase onto it rather than failing the run before we ever post.
+            git pull --rebase origin main || true
             git push
             echo "committed=true" >> "$GITHUB_OUTPUT"
           fi
