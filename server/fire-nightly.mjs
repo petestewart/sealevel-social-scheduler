@@ -47,6 +47,18 @@ if (res.status === 204) {
   console.log(`${new Date().toISOString()} dispatched nightly-post OK`);
 } else {
   console.error(`ERROR: GitHub returned HTTP ${res.status}`);
+  if (res.status === 401) {
+    console.error(
+      "GH_DISPATCH_TOKEN is expired or revoked — regenerate it in GitHub " +
+        "(Settings → Developer settings → Fine-grained tokens) and update the " +
+        "Railway variable. See server/README.md."
+    );
+  } else if (res.status === 403 || res.status === 404) {
+    console.error(
+      `GH_DISPATCH_TOKEN can't dispatch to ${repo} — check the token has ` +
+        "access to this repository with Contents: Read and write."
+    );
+  }
   console.error(await res.text());
   process.exit(1);
 }
