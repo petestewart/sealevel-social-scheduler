@@ -30,6 +30,7 @@ http_code=$(curl -sS -o /tmp/sealevel-dispatch-response.txt -w '%{http_code}' \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer $TOKEN" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
+  -H "Content-Type: application/json" \
   "https://api.github.com/repos/$REPO/dispatches" \
   -d '{"event_type":"nightly-post"}')
 
@@ -37,6 +38,10 @@ if [ "$http_code" = "204" ]; then
   echo "$(date -u +%FT%TZ) dispatched nightly-post OK"
 else
   echo "ERROR: GitHub API returned HTTP $http_code" >&2
+  case "$http_code" in
+    401) echo "Token is expired or revoked — regenerate it (Settings → Developer settings → Fine-grained tokens) and update $TOKEN_FILE or GH_DISPATCH_TOKEN." >&2 ;;
+    403|404) echo "Token can't dispatch to $REPO — check it has access to this repository with Contents: Read and write." >&2 ;;
+  esac
   cat /tmp/sealevel-dispatch-response.txt >&2
   exit 1
 fi
